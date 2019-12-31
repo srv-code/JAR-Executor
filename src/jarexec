@@ -1,0 +1,50 @@
+#!/bin/bash
+
+APP_VERSION=1.0
+ARCHIVE_LOCATION=/mnt/c/LinuxApps/java/archives/
+
+showPrograms() {
+	ext=".jar"
+	extLen=${#ext}
+	for file in `ls "$ARCHIVE_LOCATION"`
+	do
+		name=$(echo "$file" | cut -c 1-$(expr ${#file} - $extLen))
+		printf "%s : " "$name" 
+		java -jar "$ARCHIVE_LOCATION""$name".jar -h | grep --color=never -i purpose 
+	done
+}
+
+showHelp() {
+	printf "Jar Program Executor [Version %.2f]:\n" $APP_VERSION
+	printf "Purpose: Shell script to run programs developed in java and stored in java archives (jar files) \n"
+	printf "Syntax: [-<option>] <jar_name_without_.jar_extension> [<command_line_arguments>...] \n"
+	printf "Options: \n"
+	printf "    -s, --show    Show all the executable programs \n"
+	printf "    -h, --help    Show this help menu and exit \n"
+}
+
+if [ $# == 0 ]; then
+	echo Error: Enter an archive name
+	exit 1
+fi
+
+if [ $(echo "$1" | cut -c 1) == "-" ]; then
+	if [ "$1" == "-s" -o "$1" == "--show" ]; then
+		showPrograms
+		exit 0
+	elif [ "$1" == "-h" -o "$1" == "--help" ]; then
+		showHelp
+		exit 0
+	else 
+		echo Wrong option "$1" provided
+		echo Use option -h, --help for help 
+		exit 1
+	fi
+fi
+
+prg=$1
+shift
+
+java -jar "$ARCHIVE_LOCATION""$prg".jar "$@"
+
+exit $?
